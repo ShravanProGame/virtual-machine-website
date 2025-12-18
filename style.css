@@ -1,38 +1,30 @@
-body { margin: 0; overflow: hidden; font-family: sans-serif; background: #222; }
+body { margin: 0; overflow: hidden; font-family: sans-serif; background: #111; }
 
-/* Launcher */
-#launcher-screen {
-    height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; background: #111; color: white;
-}
-#launch-btn {
-    padding: 15px 30px; font-size: 20px; cursor: pointer; background: #27c93f; color: white; border: none; border-radius: 5px;
-}
-
-/* Desktop */
+/* Desktop Background */
 #desktop-container {
     width: 100vw; height: 100vh; 
-    background: url('https://images.unsplash.com/photo-1477346611705-65d1883cee1e?auto=format&fit=crop&w=1600&q=80') center/cover;
+    background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80') center/cover;
     position: relative;
 }
 
-/* App Grid */
+/* Icons */
 .desktop-icons {
-    padding: 20px; display: flex; flex-direction: column; gap: 15px; flex-wrap: wrap; height: 80%; width: 100px;
+    padding: 20px; display: flex; flex-direction: column; gap: 15px; flex-wrap: wrap; height: 85%; width: 100px;
 }
 .app-icon {
-    width: 80px; text-align: center; color: white; cursor: pointer; text-shadow: 1px 1px 2px black; font-size: 14px;
+    width: 80px; text-align: center; color: white; cursor: pointer; text-shadow: 1px 1px 2px black; font-size: 13px;
 }
 .app-icon img, .app-icon i {
-    width: 48px; height: 48px; display: block; margin: 0 auto 5px; font-size: 40px;
+    width: 40px; height: 40px; display: block; margin: 0 auto 5px; font-size: 35px;
 }
 
 /* Taskbar */
 .taskbar {
-    position: absolute; bottom: 0; width: 100%; height: 45px; background: rgba(20, 20, 20, 0.9);
-    display: flex; align-items: center; padding: 0 10px; z-index: 9999; backdrop-filter: blur(5px);
+    position: absolute; bottom: 0; width: 100%; height: 45px; background: rgba(0, 0, 0, 0.85);
+    display: flex; align-items: center; padding: 0 10px; z-index: 9999;
 }
 .taskbar button {
-    background: none; border: none; color: white; font-size: 22px; padding: 0 15px; cursor: pointer; transition: 0.2s;
+    background: none; border: none; color: white; font-size: 20px; padding: 0 15px; cursor: pointer;
 }
 .taskbar button:hover { background: rgba(255,255,255,0.1); }
 .taskbar-apps { flex-grow: 1; display: flex; gap: 10px; margin-left: 10px; }
@@ -40,8 +32,8 @@ body { margin: 0; overflow: hidden; font-family: sans-serif; background: #222; }
 
 /* Windows */
 .window {
-    position: absolute; width: 600px; height: 400px; background: white; border-radius: 8px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6); display: flex; flex-direction: column; resize: both; overflow: hidden;
+    position: absolute; width: 700px; height: 500px; background: white; border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; resize: both; overflow: hidden;
 }
 .title-bar {
     height: 30px; background: #e0e0e0; display: flex; align-items: center; padding: 0 10px; cursor: move; border-bottom: 1px solid #ccc;
@@ -53,16 +45,16 @@ body { margin: 0; overflow: hidden; font-family: sans-serif; background: #222; }
 .window-content { flex-grow: 1; border: none; background: #fff; position: relative; }
 iframe { width: 100%; height: 100%; border: none; display: block;}
 
-/* Menus */
+/* Menu */
 #settings-menu {
-    position: absolute; bottom: 50px; left: 5px; background: #222; padding: 10px; border-radius: 5px; width: 150px;
+    position: absolute; bottom: 50px; left: 5px; background: #222; border-radius: 5px; width: 150px; color: white; overflow: hidden;
 }
+.menu-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #333; }
+.menu-item:hover { background: #0078d4; }
 .hidden { display: none !important; }
 .visible { display: block !important; }
-#settings-menu button { display: block; width: 100%; margin: 5px 0; background: #444; border: none; padding: 8px; color: white; cursor: pointer; }
-#settings-menu button:hover { background: #666; }
 
-/* Modals */
+/* Modal */
 .modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index: 10000; }
 .modal-content { background: white; padding: 20px; border-radius: 8px; width: 300px; text-align: center;}
-.modal-content input { width: 90%; margin: 8px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+.modal-content input { width: 90%; margin: 8px 0; padding: 8px; border: 1px solid #ccc; }
