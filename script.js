@@ -1,310 +1,183 @@
-// --- 1. App Configuration ---
-// Defines all apps in the system
-const defaultApps = [
-    { name: "Browser", url: "https://skibidiboi333.zjhmz.cn/", icon: "fa-compass", color: "#007AFF" },
-    { name: "Chat", url: "https://canvas-x68p.onrender.com/", icon: "fa-message", color: "#34C759" },
-    { name: "AI Chat", url: "https://chatbotchatapp.com/", icon: "fa-robot", color: "#AF52DE" },
-    { name: "Math Game", url: "https://gn-math2-16737703.codehs.me/", icon: "fa-gamepad", color: "#FF9500" },
-    { name: "Beech Proxy", url: "https://beech.watch/", icon: "fa-shield-cat", color: "#FF2D55" }, // Might be blocked by X-Frame
-    { name: "JS Exec", type: "js-exec", icon: "fa-code", color: "#FFCC00" },
-    { name: "Python", type: "python-exec", icon: "fa-brands fa-python", color: "#306998" },
-    { name: "File Explorer", type: "files", icon: "fa-folder", color: "#007AFF" },
-    { name: "Settings", type: "settings", icon: "fa-gear", color: "#8E8E93" },
-    { name: "Theme Builder", type: "theme", icon: "fa-paintbrush", color: "#5856D6" },
-    { name: "About", type: "about", icon: "fa-circle-info", color: "#000000" }
-];
+// VM 3.0 - Complete System
+// Features: Persistent Savings, Proxy Browser, New Tab Mode, Boot Sequence
 
-// --- 2. Initialization ---
-window.onload = function() {
-    renderDock();
-    updateClock();
-    loadFiles(); // Load saved files from local storage
-    
-    // Auto-open About on first visit
-    if(!localStorage.getItem('vm-visited')) {
-        openWindow(defaultApps.find(a => a.name === 'About'));
-        localStorage.setItem('vm-visited', 'true');
-    }
+const state = {
+    wallpaper: localStorage.getItem('vm_wallpaper') || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
+    isBooting: true
 };
 
-// --- 3. Rendering the Dock ---
+const apps = [
+    {
+        name: "Browser",
+        icon: "🌐",
+        type: "window", // Opens inside the VM
+        url: "/proxy/https://duckduckgo.com" // Uses your new proxy!
+    },
+    {
+        name: "Notepad",
+        icon: "📝",
+        type: "window",
+        content: "<textarea style='width:100%; height:100%; border:none; outline:none; padding:10px; background: transparent; color: white;' placeholder='Start typing...'></textarea>"
+    },
+    {
+        name: "Settings",
+        icon: "⚙️",
+        type: "window",
+        content: `
+            <div style="padding: 20px; color: white;">
+                <h3>Display Settings</h3>
+                <p>Paste an Image URL to change wallpaper:</p>
+                <input type="text" id="wp-input" placeholder="https://..." style="width: 100%; padding: 5px; margin-bottom: 10px;">
+                <button onclick="changeWallpaper()" style="padding: 5px 10px; cursor: pointer;">Apply & Save</button>
+            </div>
+        `
+    },
+    {
+        name: "Math Game",
+        icon: "➗",
+        type: "link", // Launches in new tab
+        url: "https://www.mathplayground.com/" 
+    },
+    {
+        name: "AI Chat",
+        icon: "🤖",
+        type: "link", // Launches in new tab
+        url: "https://chatgpt.com/" 
+    }
+];
+
+// 1. Boot Sequence
+window.onload = function() {
+    const bootScreen = document.getElementById('boot-screen');
+    const desktop = document.getElementById('desktop');
+    
+    // Apply saved wallpaper immediately
+    document.body.style.backgroundImage = `url('${state.wallpaper}')`;
+
+    setTimeout(() => {
+        bootScreen.style.opacity = '0';
+        setTimeout(() => {
+            bootScreen.style.display = 'none';
+            desktop.style.opacity = '1';
+            renderDesktopIcons();
+            renderDock();
+        }, 1000);
+    }, 2000); // 2 second boot time
+};
+
+// 2. Desktop Icons (New Feature!)
+function renderDesktopIcons() {
+    const grid = document.getElementById('app-grid');
+    grid.innerHTML = '';
+    
+    apps.forEach((app, index) => {
+        const icon = document.createElement('div');
+        icon.className = 'app-icon';
+        icon.innerHTML = `
+            <div style="font-size: 30px;">${app.icon}</div>
+            <span>${app.name}</span>
+        `;
+        icon.onclick = () => openApp(index);
+        grid.appendChild(icon);
+    });
+}
+
+// 3. Dock Icons
 function renderDock() {
     const dock = document.getElementById('dock');
     dock.innerHTML = '';
-
-    defaultApps.forEach(app => {
-        let el = document.createElement('div');
-        el.className = 'dock-icon';
-        el.style.background = app.color || '#333';
-        el.innerHTML = `<i class="fa-solid ${app.icon}"></i><div class="tooltip">${app.name}</div>`;
-        el.onclick = () => openWindow(app);
-        dock.appendChild(el);
+    apps.forEach((app, index) => {
+        const icon = document.createElement('div');
+        icon.className = 'dock-icon';
+        icon.innerText = app.icon;
+        icon.onclick = () => openApp(index);
+        dock.appendChild(icon);
     });
 }
 
-// --- 4. Window Management System ---
-let zIndex = 100;
+// 4. App Launcher
+function openApp(index) {
+    const app = apps[index];
 
-function openWindow(app) {
-    // 1. Check if window already exists (Simulate single instance)
-    // Removed strict check to allow multiple browser windows if needed, but safe to keep simple.
-    
-    zIndex++;
+    // If it's a "link" type (like Games), open in new tab
+    if (app.type === 'link') {
+        window.open(app.url, '_blank');
+        return;
+    }
+
+    // Otherwise, open internal window
+    createWindow(app);
+}
+
+function createWindow(app) {
     const win = document.createElement('div');
     win.className = 'window';
-    win.style.zIndex = zIndex;
+    win.style.left = '100px';
+    win.style.top = '100px';
     
-    // Random Position
-    const top = 50 + (Math.random() * 50);
-    const left = 50 + (Math.random() * 100);
-    win.style.top = top + 'px';
-    win.style.left = left + 'px';
-
-    // 2. Generate Content based on Type
-    let content = '';
-    
-    if (app.type === 'js-exec') {
-        content = `
-            <div class="terminal-bg">
-                <div style="flex-grow:1; font-size:14px; white-space:pre-wrap;" id="js-output">Welcome to JS Terminal v1.0\nType code and execute.</div>
-                <div style="display:flex; border-top:1px solid #333; padding-top:5px;">
-                    <span style="color:#0f0; margin-right:10px;">➜</span>
-                    <input type="text" class="terminal-input" placeholder="alert('Hello')" onkeydown="if(event.key==='Enter') runJS(this)">
-                </div>
-            </div>`;
-    } else if (app.type === 'python-exec') {
-        // Embedding a lightweight python compiler
-        content = `<iframe src="https://trinket.io/embed/python3/a5bd54189b" allowfullscreen></iframe>`;
-    } else if (app.type === 'files') {
-        content = `
-            <div style="display:flex; flex-direction:column; height:100%;">
-                <div style="padding:10px; background:#f0f0f0; border-bottom:1px solid #ccc;">
-                    <button class="mac-btn" onclick="document.getElementById('file-upload').click()">+ Upload File</button>
-                    <input type="file" id="file-upload" style="display:none" onchange="uploadFile(this)">
-                </div>
-                <div class="file-grid" id="file-grid"></div>
-            </div>`;
-        setTimeout(renderFiles, 100); // Render after DOM insertion
-    } else if (app.type === 'settings') {
-        content = `
-            <div class="settings-panel">
-                <div class="settings-group">
-                    <label class="settings-label">Wallpaper URL</label>
-                    <input type="text" id="wp-url" style="width:100%; padding:5px;" placeholder="https://...">
-                    <button class="mac-btn" style="margin-top:10px;" onclick="changeWallpaper()">Apply</button>
-                </div>
-                <div class="settings-group">
-                    <label class="settings-label">Panic Button</label>
-                    <button class="mac-btn" onclick="window.location.href='https://google.com'">Emergency Exit</button>
-                </div>
-            </div>`;
-    } else if (app.type === 'about') {
-        content = `
-            <div style="padding:40px; text-align:center;">
-                <h1 style="margin:0;">VM 2.0</h1>
-                <p style="color:#888;">Version 2.0 (Proxy Edition)</p>
-                <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
-                <p>VM is a proxy based game made for school.</p>
-                <p><strong>Created by TikTok Pr0xy</strong></p>
-                <p>Credits to Luminal OS for inspiration.</p>
-                <br>
-                <button class="mac-btn" onclick="this.closest('.window').remove()">Close</button>
-            </div>`;
-    } else if (app.type === 'theme') {
-         content = `
-            <div class="settings-panel">
-                <h3>Theme Builder</h3>
-                <p>Select a Dock Color:</p>
-                <input type="color" onchange="document.querySelector('.dock').style.background = this.value">
-            </div>`;
-    } else {
-        // Standard Web App
-        content = `<iframe src="${app.url}"></iframe>`;
-    }
-
-    // 3. Build Window HTML
-    win.innerHTML = `
-        <div class="title-bar" onmousedown="dragWindow(event, this.parentElement)">
-            <div class="traffic-lights">
-                <div class="light close-btn" onclick="closeWindow(this)"></div>
-                <div class="light min-btn" onclick="closeWindow(this)"></div>
-                <div class="light max-btn" onclick="maximizeWindow(this)"></div>
-            </div>
-            <div class="window-title">${app.name}</div>
-        </div>
-        <div class="window-content">${content}</div>
+    // Header
+    const header = document.createElement('div');
+    header.className = 'window-header';
+    header.innerHTML = `
+        <span>${app.name}</span>
+        <span class="close-btn" onclick="this.parentElement.parentElement.remove()">✕</span>
     `;
-
-    document.getElementById('windows-area').appendChild(win);
-    win.addEventListener('mousedown', () => win.style.zIndex = ++zIndex);
-}
-
-// --- 5. Window Actions ---
-function closeWindow(btn) {
-    const win = btn.closest('.window');
-    win.classList.add('closing');
-    setTimeout(() => win.remove(), 200);
-}
-
-function maximizeWindow(btn) {
-    const win = btn.closest('.window');
-    if (win.style.width === '100vw') {
-        win.style.width = '800px'; win.style.height = '550px'; 
-        win.style.top = '50px'; win.style.left = '50px';
-    } else {
-        win.style.width = '100vw'; win.style.height = 'calc(100vh - 28px)'; 
-        win.style.top = '28px'; win.style.left = '0';
-    }
-}
-
-function dragWindow(e, win) {
-    if(e.target.classList.contains('light')) return;
-    let shiftX = e.clientX - win.getBoundingClientRect().left;
-    let shiftY = e.clientY - win.getBoundingClientRect().top;
     
-    function moveAt(pageX, pageY) {
-        // Prevent dragging above top bar
-        let newTop = pageY - shiftY;
-        if(newTop < 28) newTop = 28;
-        
-        win.style.left = pageX - shiftX + 'px';
-        win.style.top = newTop + 'px';
-    }
+    // Content
+    const content = document.createElement('div');
+    content.className = 'window-content';
     
-    function onMouseMove(event) { moveAt(event.pageX, event.pageY); }
-    document.addEventListener('mousemove', onMouseMove);
-    document.onmouseup = function() {
-        document.removeEventListener('mousemove', onMouseMove);
+    if (app.url) {
+        // If it's the Browser, use iframe with Proxy URL
+        content.innerHTML = `<iframe src="${app.url}" style="width:100%; height:100%; border:none;"></iframe>`;
+    } else if (app.content) {
+        content.innerHTML = app.content;
+    }
+
+    win.appendChild(header);
+    win.appendChild(content);
+    document.getElementById('desktop').appendChild(win);
+    
+    makeDraggable(win);
+}
+
+// 5. Wallpaper Saver
+window.changeWallpaper = function() {
+    const url = document.getElementById('wp-input').value;
+    if (url) {
+        document.body.style.backgroundImage = `url('${url}')`;
+        localStorage.setItem('vm_wallpaper', url); // Saves to memory
+        alert("Wallpaper Saved!");
+    }
+};
+
+// 6. Draggable Windows Logic
+function makeDraggable(element) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    element.querySelector('.window-header').onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        element.style.top = (element.offsetTop - pos2) + "px";
+        element.style.left = (element.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
         document.onmouseup = null;
-    };
-}
-
-// --- 6. JS Executor Logic ---
-function runJS(input) {
-    const code = input.value;
-    const output = input.parentElement.previousElementSibling;
-    
-    try {
-        output.innerHTML += `\n<span style="color:#fff;">➜ ${code}</span>`;
-        // Safe-ish eval (Warning: Still allows anything, but it's a VM simulator so it's fine)
-        let result = eval(code); 
-        output.innerHTML += `\n<span style="color:#aaa;">< ${result}</span>`;
-    } catch (e) {
-        output.innerHTML += `\n<span style="color:red;">Error: ${e.message}</span>`;
-    }
-    input.value = '';
-    output.scrollTop = output.scrollHeight;
-}
-
-// --- 7. File Explorer Logic (Simulated) ---
-let myFiles = [];
-
-function loadFiles() {
-    const saved = localStorage.getItem('vm-files');
-    if(saved) myFiles = JSON.parse(saved);
-}
-
-function uploadFile(input) {
-    const file = input.files[0];
-    if(!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const fileObj = {
-            name: file.name,
-            type: file.type,
-            data: e.target.result,
-            date: new Date().toLocaleDateString()
-        };
-        myFiles.push(fileObj);
-        localStorage.setItem('vm-files', JSON.stringify(myFiles));
-        renderFiles();
-    };
-    reader.readAsDataURL(file);
-}
-
-function renderFiles() {
-    const grid = document.getElementById('file-grid');
-    if(!grid) return;
-    grid.innerHTML = '';
-    
-    myFiles.forEach((file, index) => {
-        let el = document.createElement('div');
-        el.className = 'file-item';
-        el.innerHTML = `
-            <div class="file-icon"><i class="fa-solid fa-file-lines"></i></div>
-            <div style="font-size:12px;">${file.name}</div>
-        `;
-        el.onclick = () => downloadFile(index);
-        el.oncontextmenu = (e) => {
-            e.preventDefault();
-            if(confirm('Delete ' + file.name + '?')) {
-                myFiles.splice(index, 1);
-                localStorage.setItem('vm-files', JSON.stringify(myFiles));
-                renderFiles();
-            }
-        };
-        grid.appendChild(el);
-    });
-}
-
-function downloadFile(index) {
-    const file = myFiles[index];
-    const a = document.createElement('a');
-    a.href = file.data;
-    a.download = file.name;
-    a.click();
-}
-
-// --- 8. Spotlight Search ---
-function openSearch() {
-    const el = document.getElementById('search-overlay');
-    if(el.style.display === 'flex') {
-        el.style.display = 'none';
-    } else {
-        el.style.display = 'flex';
-        document.getElementById('search-input').focus();
-    }
-}
-
-function handleSearch() {
-    const query = document.getElementById('search-input').value.toLowerCase();
-    const resultsDiv = document.getElementById('search-results');
-    resultsDiv.innerHTML = '';
-    
-    if(!query) return;
-
-    const hits = defaultApps.filter(app => app.name.toLowerCase().includes(query));
-    
-    hits.forEach(app => {
-        let div = document.createElement('div');
-        div.className = 'search-result';
-        div.innerHTML = `<i class="fa-solid ${app.icon}"></i> <span>${app.name}</span>`;
-        div.onclick = () => {
-            openWindow(app);
-            document.getElementById('search-overlay').style.display = 'none';
-        }
-        resultsDiv.appendChild(div);
-    });
-}
-
-// --- 9. System Utilities ---
-function updateClock() {
-    const now = new Date();
-    let hours = now.getHours();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12; 
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const day = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-    
-    document.getElementById('clock').innerText = `${day}  ${hours}:${minutes} ${ampm}`;
-    setTimeout(updateClock, 1000);
-}
-
-function changeWallpaper() {
-    const url = document.getElementById('wp-url').value;
-    if(url) {
-        document.getElementById('desktop-container').style.backgroundImage = `url('${url}')`;
+        document.onmousemove = null;
     }
 }
