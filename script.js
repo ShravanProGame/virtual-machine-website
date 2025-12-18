@@ -1,295 +1,220 @@
-/* --- CONFIGURATION & APPS --- */
-// Defines every app on the system.
+// --- CONFIGURATION ---
 const apps = [
-    {
-        name: "Browser",
-        icon: "fa-compass",
-        color: "#007AFF",
-        type: "proxy",
-        url: "https://duckduckgo.com" // Starts with DuckDuckGo via Proxy
-    },
-    {
-        name: "AI Chat",
-        icon: "fa-robot",
-        color: "#AF52DE",
-        type: "proxy",
-        url: "https://chatbotchatapp.com/" // The specific AI you asked for
-    },
-    {
-        name: "Math Game",
-        icon: "fa-calculator",
-        color: "#FF9500",
-        type: "proxy",
-        url: "https://gn-math2-16737703.codehs.me/" // The specific Math link
-    },
-    {
-        name: "Python",
-        icon: "fa-brands fa-python",
-        color: "#306998",
-        type: "iframe",
-        url: "https://trinket.io/embed/python3/a5bd54189b" // Python Executor
-    },
-    {
-        name: "JS Exec",
-        icon: "fa-brands fa-js",
-        color: "#F7DF1E",
-        type: "internal",
-        appName: "js-exec"
-    },
-    {
-        name: "Beech Watch",
-        icon: "fa-shield-cat",
-        color: "#FF2D55",
-        type: "newtab", // Complex sites often need new tabs to work 100%
-        url: "https://beech.watch/"
-    },
-    {
-        name: "File Explorer",
-        icon: "fa-folder-open",
-        color: "#5AC8FA",
-        type: "internal",
-        appName: "files"
-    },
-    {
-        name: "Settings",
-        icon: "fa-gear",
-        color: "#8E8E93",
-        type: "internal",
-        appName: "settings"
-    },
-    {
-        name: "About",
-        icon: "fa-circle-info",
-        color: "#333333",
-        type: "internal",
-        appName: "about"
-    }
+    { id: 'browser', name: 'Browser', icon: '🌍', type: 'browser', url: 'https://www.bing.com', color: '#3498db' },
+    { id: 'games', name: 'Games', icon: '🎮', type: 'iframe', url: 'https://poki.com', color: '#e74c3c' },
+    { id: 'movies', name: 'Movies', icon: '🍿', type: 'iframe', url: 'https://www.youtube.com/embed/videoseries?list=PLU8wpH_Lfhmsy3Qo5fVf4e7rJ_I_r7_P_', color: '#9b59b6' },
+    { id: 'chat', name: 'ChatGPT', icon: '🤖', type: 'iframe', url: 'https://chatgpt.com', color: '#10a37f' },
+    { id: 'soundboard', name: 'Soundboard', icon: '🔊', type: 'iframe', url: 'https://soundboardly.com/', color: '#f1c40f' },
+    { id: 'notepad', name: 'Notepad', icon: '📝', type: 'notepad', color: '#f39c12' },
+    { id: 'files', name: 'Files', icon: '📁', type: 'files', color: '#34495e' },
+    { id: 'settings', name: 'Settings', icon: '⚙️', type: 'settings', color: '#7f8c8d' }
 ];
 
+let highestZ = 100;
+
 // --- BOOT & INIT ---
-window.onload = function() {
-    // 1. Load Wallpaper
-    const savedWP = localStorage.getItem('vm_wallpaper');
-    if(savedWP) document.getElementById('desktop').style.backgroundImage = `url('${savedWP}')`;
-
-    // 2. Render Interface
-    renderDock();
-    renderDesktopIcons();
-    updateClock();
-
-    // 3. Boot Animation
+window.onload = () => {
+    // Handle Boot Screen
+    const boot = document.getElementById('boot-screen');
     setTimeout(() => {
-        document.getElementById('boot-screen').style.opacity = '0';
-        setTimeout(() => {
-            document.getElementById('boot-screen').style.display = 'none';
-            document.getElementById('desktop').style.opacity = '1';
-        }, 1000);
+        boot.style.opacity = '0';
+        setTimeout(() => boot.remove(), 1000);
     }, 2500);
+
+    renderIcons();
+    renderDock();
+    updateClock();
+    setInterval(updateClock, 1000);
 };
 
-// --- RENDERING ---
+// --- RENDER FUNCTIONS ---
+function renderIcons() {
+    const container = document.getElementById('icon-container');
+    let startX = 20;
+    let startY = 50;
+
+    apps.forEach((app) => {
+        const el = document.createElement('div');
+        el.className = 'app-icon';
+        // Set initial positions but leave them absolute for dragging
+        el.style.left = startX + 'px';
+        el.style.top = startY + 'px';
+        el.innerHTML = `
+            <div class="app-img" style="color: ${app.color}">${app.icon}</div>
+            <div class="app-name">${app.name}</div>
+        `;
+        
+        // Double Click to open
+        el.ondblclick = () => openApp(app);
+        
+        // Make draggable
+        makeDraggable(el, true);
+        
+        container.appendChild(el);
+        
+        // Simple grid calculation for startup
+        startY += 100;
+        if (startY > window.innerHeight - 150) {
+            startY = 50;
+            startX += 90;
+        }
+    });
+}
+
 function renderDock() {
     const dock = document.getElementById('dock');
-    dock.innerHTML = '';
     apps.forEach(app => {
-        let el = document.createElement('div');
-        el.className = 'dock-item';
-        el.style.backgroundColor = app.color;
-        el.innerHTML = `<i class="fa-solid ${app.icon}"></i><div class="dock-tooltip">${app.name}</div>`;
-        el.onclick = () => launchApp(app);
+        const el = document.createElement('div');
+        el.className = 'dock-icon';
+        el.id = `dock-${app.id}`;
+        el.innerHTML = `${app.icon}<div class="dock-dot"></div>`;
+        el.onclick = () => openApp(app);
         dock.appendChild(el);
     });
 }
 
-function renderDesktopIcons() {
-    const grid = document.getElementById('desktop-grid');
-    grid.innerHTML = '';
-    apps.forEach(app => {
-        let el = document.createElement('div');
-        el.className = 'app-icon';
-        el.innerHTML = `
-            <div class="icon-img" style="color:${app.color}"><i class="fa-solid ${app.icon}"></i></div>
-            <span class="icon-label">${app.name}</span>
-        `;
-        el.onclick = () => launchApp(app);
-        grid.appendChild(el);
-    });
-}
+// --- APP LOGIC ---
+function openApp(app) {
+    document.querySelector(`#dock-${app.id}`).classList.add('open');
 
-// --- LAUNCHER LOGIC ---
-function launchApp(app) {
-    if (app.type === 'newtab') {
-        window.open(app.url, '_blank');
-        return;
-    }
-
-    let content = '';
-    
-    // TYPE: PROXY (Runs through your server.js)
-    if (app.type === 'proxy') {
-        content = `<iframe src="/proxy/${app.url}"></iframe>`;
-    }
-    // TYPE: IFRAME (Direct Embed)
-    else if (app.type === 'iframe') {
-        content = `<iframe src="${app.url}"></iframe>`;
-    }
-    // TYPE: INTERNAL (Custom HTML apps)
-    else if (app.type === 'internal') {
-        content = getInternalApp(app.appName);
-    }
-
-    createWindow(app.name, content);
-}
-
-// --- INTERNAL APP CONTENTS ---
-function getInternalApp(name) {
-    if (name === 'js-exec') {
-        return `
-            <div class="terminal">
-                <div id="js-out">VM JS Console v1.0</div>
-                <div style="margin-top:10px; display:flex;">
-                    <span style="color:lime; margin-right:5px;">></span>
-                    <input type="text" onkeydown="if(event.key==='Enter') runJS(this)">
-                </div>
-            </div>`;
-    }
-    if (name === 'files') {
-        return `
-            <div style="padding:10px; display:flex; flex-direction:column; height:100%;">
-                <div style="border-bottom:1px solid #ccc; padding-bottom:5px;">
-                    <button onclick="document.getElementById('f-up').click()">Upload File</button>
-                    <input type="file" id="f-up" hidden onchange="handleUpload(this)">
-                </div>
-                <div class="file-grid" id="file-area"></div>
-                <script>setTimeout(renderFiles, 100)</script>
-            </div>`;
-    }
-    if (name === 'about') {
-        return `
-            <div style="padding:40px; text-align:center;">
-                <h1>VM</h1>
-                <p>VM is a proxy based game made for school.</p>
-                <h3>Made by TikTok Pr0xy</h3>
-                <p>Credits to Luminal OS for inspiration.</p>
-            </div>`;
-    }
-    if (name === 'settings') {
-        return `
-            <div style="padding:20px;">
-                <h3>Wallpaper Settings</h3>
-                <input type="text" id="wp-in" placeholder="Image URL..." style="width:100%; padding:8px;">
-                <button onclick="saveWP()" style="margin-top:10px;">Save Wallpaper</button>
-            </div>`;
-    }
-}
-
-// --- WINDOW MANAGEMENT ---
-let zIndex = 100;
-function createWindow(title, content) {
-    zIndex++;
     const win = document.createElement('div');
     win.className = 'window';
-    win.style.zIndex = zIndex;
-    win.style.top = (50 + Math.random() * 50) + 'px';
-    win.style.left = (50 + Math.random() * 50) + 'px';
+    win.style.left = '100px';
+    win.style.top = '50px';
+    win.style.width = '600px';
+    win.style.height = '400px';
+    win.style.zIndex = ++highestZ;
+    
+    win.onmousedown = () => win.style.zIndex = ++highestZ;
 
-    win.innerHTML = `
-        <div class="title-bar" onmousedown="dragStart(event, this.parentElement)">
-            <div class="traffic-lights">
-                <div class="light close" onclick="this.closest('.window').remove()"></div>
-                <div class="light min"></div>
-                <div class="light max" onclick="toggleMax(this.closest('.window'))"></div>
-            </div>
-            <div class="window-title">${title}</div>
+    // Window Header
+    const header = document.createElement('div');
+    header.className = 'title-bar';
+    header.innerHTML = `
+        <div class="window-controls">
+            <div class="control close"></div>
+            <div class="control minimize"></div>
+            <div class="control maximize"></div>
         </div>
-        <div class="window-content">${content}</div>
+        <div style="flex:1; text-align:center; font-size:12px; color:#555;">${app.name}</div>
     `;
-
-    document.getElementById('windows-area').appendChild(win);
-    win.addEventListener('mousedown', () => win.style.zIndex = ++zIndex);
     
-    // Trigger file render if needed
-    if(title === 'File Explorer') setTimeout(renderFiles, 200);
-}
-
-// --- DRAG LOGIC ---
-function dragStart(e, win) {
-    let shiftX = e.clientX - win.getBoundingClientRect().left;
-    let shiftY = e.clientY - win.getBoundingClientRect().top;
-    
-    function moveAt(pageX, pageY) {
-        win.style.left = pageX - shiftX + 'px';
-        win.style.top = pageY - shiftY + 'px';
-    }
-    function onMouseMove(event) { moveAt(event.pageX, event.pageY); }
-    
-    document.addEventListener('mousemove', onMouseMove);
-    document.onmouseup = function() {
-        document.removeEventListener('mousemove', onMouseMove);
-        document.onmouseup = null;
+    // Header Controls
+    header.querySelector('.close').onclick = () => {
+        win.remove();
+        document.querySelector(`#dock-${app.id}`).classList.remove('open');
     };
+    
+    let isMaxed = false;
+    header.querySelector('.maximize').onclick = () => {
+        if(!isMaxed) {
+            win.style.top = '30px'; win.style.left = '0'; win.style.width = '100%'; win.style.height = 'calc(100% - 80px)';
+            isMaxed = true;
+        } else {
+            win.style.top = '50px'; win.style.left = '100px'; win.style.width = '600px'; win.style.height = '400px';
+            isMaxed = false;
+        }
+    };
+
+    // Window Content
+    const content = document.createElement('div');
+    content.className = 'window-content';
+
+    if (app.type === 'browser') {
+        content.innerHTML = `
+            <div class="browser-bar">
+                <button onclick="document.getElementById('if-${app.id}').src = document.getElementById('url-${app.id}').value">Go</button>
+                <input id="url-${app.id}" type="text" value="${app.url}" placeholder="URL">
+            </div>
+            <iframe id="if-${app.id}" src="${app.url}"></iframe>
+        `;
+    } else if (app.type === 'iframe') {
+        content.innerHTML = `<iframe src="${app.url}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    } else if (app.type === 'notepad') {
+        const savedNote = localStorage.getItem('webos-note') || '';
+        content.innerHTML = `
+            <div class="notepad-toolbar"><button class="btn" id="save-btn-${app.id}">Save</button></div>
+            <textarea class="notepad-area" id="note-${app.id}">${savedNote}</textarea>
+        `;
+        setTimeout(() => {
+            document.getElementById(`save-btn-${app.id}`).onclick = () => {
+                const text = document.getElementById(`note-${app.id}`).value;
+                localStorage.setItem('webos-note', text);
+                alert('Saved!');
+            };
+        }, 100);
+    } else if (app.type === 'files') {
+        const savedNote = localStorage.getItem('webos-note');
+        if (savedNote) {
+            content.innerHTML = `
+                <div class="file-grid">
+                    <div class="file-item" id="file-open-note">
+                        <div class="file-icon">📄</div>
+                        <div class="file-name">notes.txt</div>
+                    </div>
+                </div>
+            `;
+            setTimeout(() => {
+                document.getElementById('file-open-note').onclick = () => openApp(apps.find(a=>a.id==='notepad'));
+            }, 100);
+        } else {
+            content.innerHTML = `<div style="padding:20px; text-align:center;">Empty Disk</div>`;
+        }
+    } else if (app.type === 'settings') {
+        content.innerHTML = `
+            <div class="settings-layout">
+                <div class="settings-sidebar">
+                    <div class="settings-item active">General</div>
+                    <div class="settings-item">Display</div>
+                </div>
+                <div class="settings-main">
+                    <h3>Settings</h3>
+                    <div class="setting-row"><span>Dark Mode</span><input type="checkbox" checked></div>
+                </div>
+            </div>
+        `;
+    }
+
+    win.appendChild(header);
+    win.appendChild(content);
+    document.getElementById('windows-area').appendChild(win);
+    makeDraggable(win, false);
 }
 
-function toggleMax(win) {
-    if(win.style.width === '100%') {
-        win.style.width = '700px'; win.style.height = '500px'; win.style.top = '50px'; win.style.left = '50px';
-    } else {
-        win.style.width = '100%'; win.style.height = 'calc(100vh - 40px)'; win.style.top = '28px'; win.style.left = '0';
+// --- DRAG UTILS ---
+function makeDraggable(elmnt, isIcon) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    const dragHandle = isIcon ? elmnt : elmnt.querySelector('.title-bar');
+    
+    dragHandle.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
     }
 }
 
-// --- UTILS & FILES ---
 function updateClock() {
     const now = new Date();
-    let hours = now.getHours();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    const mins = now.getMinutes().toString().padStart(2, '0');
-    document.getElementById('clock').innerText = `${hours}:${mins} ${ampm}`;
-    setTimeout(updateClock, 1000);
-}
-
-function saveWP() {
-    const url = document.getElementById('wp-in').value;
-    localStorage.setItem('vm_wallpaper', url);
-    document.getElementById('desktop').style.backgroundImage = `url('${url}')`;
-}
-
-function runJS(input) {
-    const out = document.getElementById('js-out');
-    try {
-        out.innerHTML += `<div style="color:white">> ${input.value}</div>`;
-        const res = eval(input.value);
-        out.innerHTML += `<div style="color:#aaa">< ${res}</div>`;
-    } catch(e) {
-        out.innerHTML += `<div style="color:red">Error: ${e.message}</div>`;
-    }
-    input.value = '';
-}
-
-// File System Simulation
-let myFiles = JSON.parse(localStorage.getItem('vm_files') || '[]');
-function handleUpload(input) {
-    const file = input.files[0];
-    const reader = new FileReader();
-    reader.onload = e => {
-        myFiles.push({ name: file.name, data: e.target.result });
-        localStorage.setItem('vm_files', JSON.stringify(myFiles));
-        renderFiles();
-    };
-    reader.readAsDataURL(file);
-}
-function renderFiles() {
-    const area = document.getElementById('file-area');
-    if(!area) return;
-    area.innerHTML = '';
-    myFiles.forEach(f => {
-        let div = document.createElement('div');
-        div.className = 'file-card';
-        div.innerHTML = `<i class="fa-solid fa-file" style="font-size:30px;color:#007AFF"></i><br><span>${f.name}</span>`;
-        div.onclick = () => {
-            let a = document.createElement('a'); a.href = f.data; a.download = f.name; a.click();
-        };
-        area.appendChild(div);
-    });
+    document.getElementById('clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
