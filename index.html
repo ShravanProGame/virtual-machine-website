@@ -3,46 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Launchpad</title>
+    <title>Classroom Helper</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
     <div id="launcher-screen">
-        <button id="launch-btn">Click to Launch System</button>
+        <button id="launch-btn">Click to Launch</button>
     </div>
 
     <div id="desktop-container" style="display:none;">
-        
-        <div class="desktop-icons" id="app-grid">
-            </div>
-
         <div id="windows-area"></div>
+        
+        <div class="desktop-icons" id="app-grid"></div>
 
         <div class="taskbar">
             <button id="start-btn"><i class="fa-brands fa-windows"></i></button>
-            <div class="taskbar-apps" id="taskbar-apps">
-                </div>
+            <div class="taskbar-apps" id="taskbar-apps"></div>
             <div class="system-tray">
-                <span id="clock">12:00 PM</span>
+                <span id="clock">12:00</span>
             </div>
         </div>
 
         <div id="settings-menu" class="hidden">
-            <h3>Cloak Tab</h3>
-            <button onclick="cloak('Google Drive')">Drive</button>
-            <button onclick="cloak('Gmail')">Gmail</button>
-            <button onclick="cloak('Canvas')">Canvas</button>
-            <button onclick="cloak('Reset')">Reset</button>
+            <button onclick="cloak('Google Drive')">Cloak: Drive</button>
+            <button onclick="cloak('Gmail')">Cloak: Gmail</button>
+            <button onclick="cloak('Canvas')">Cloak: Canvas</button>
         </div>
 
         <div id="add-app-modal" class="hidden modal">
             <div class="modal-content">
-                <h3>Add New App</h3>
-                <input type="text" id="new-app-name" placeholder="App Name">
-                <input type="text" id="new-app-url" placeholder="https://example.com">
-                <button onclick="saveNewApp()">Add</button>
+                <h3>Add App</h3>
+                <input type="text" id="new-app-name" placeholder="Name">
+                <input type="text" id="new-app-url" placeholder="https://...">
+                <br><br>
+                <button onclick="saveNewApp()">Save</button>
                 <button onclick="toggleAddApp()">Cancel</button>
             </div>
         </div>
