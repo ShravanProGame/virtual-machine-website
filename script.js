@@ -1,46 +1,37 @@
 /* --- CONFIGURATION & APPS --- */
+// Using real favicons for logos where possible
 const apps = [
     {
-        name: "Browser",
-        icon: "fa-compass",
-        color: "#007AFF",
+        name: "DuckDuckGo",
+        iconImg: "https://duckduckgo.com/favicon.ico", // Real Logo
         type: "proxy",
-        url: "https://en.wikipedia.org/wiki/Main_Page" // Changed to Wikipedia for better testing
+        url: "https://duckduckgo.com"
     },
     {
-        name: "AI Chat",
-        icon: "fa-robot",
-        color: "#AF52DE",
+        name: "Bing",
+        iconImg: "https://www.bing.com/favicon.ico", // Real Logo
         type: "proxy",
-        url: "https://chatbotchatapp.com/"
+        url: "https://www.bing.com"
     },
     {
-        name: "Math Game",
-        icon: "fa-calculator",
+        name: "Roblox",
+        iconImg: "https://images.rbxcdn.com/23421382939a9f4ae8bbe60dbe2a3e7e.ico.gzip", // Real Roblox Logo
+        type: "proxy",
+        url: "https://www.roblox.com"
+    },
+    {
+        name: "Games",
+        icon: "fa-gamepad", // FontAwesome fallback
         color: "#FF9500",
         type: "proxy",
         url: "https://gn-math2-16737703.codehs.me/"
     },
     {
-        name: "Python",
-        icon: "fa-brands fa-python",
-        color: "#306998",
-        type: "iframe",
-        url: "https://trinket.io/embed/python3/a5bd54189b"
-    },
-    {
-        name: "JS Exec",
-        icon: "fa-brands fa-js",
-        color: "#F7DF1E",
+        name: "Add Link",
+        icon: "fa-plus",
+        color: "#34C759",
         type: "internal",
-        appName: "js-exec"
-    },
-    {
-        name: "Beech Watch",
-        icon: "fa-shield-cat",
-        color: "#FF2D55",
-        type: "newtab", 
-        url: "https://beech.watch/"
+        appName: "creator"
     },
     {
         name: "File Explorer",
@@ -70,15 +61,23 @@ window.onload = function() {
     const savedWP = localStorage.getItem('vm_wallpaper');
     if(savedWP) document.getElementById('desktop').style.backgroundImage = `url('${savedWP}')`;
 
+    // Load user custom apps if any
+    const userApps = JSON.parse(localStorage.getItem('vm_user_apps') || '[]');
+    userApps.forEach(a => apps.push(a));
+
     renderDock();
     renderDesktopIcons();
     updateClock();
 
+    // Boot Animation
     setTimeout(() => {
         document.getElementById('boot-screen').style.opacity = '0';
         setTimeout(() => {
             document.getElementById('boot-screen').style.display = 'none';
             document.getElementById('desktop').style.opacity = '1';
+            
+            // AUTO-OPEN CREDITS (As requested)
+            setTimeout(() => launchApp(apps.find(a => a.name === "About")), 500);
         }, 1000);
     }, 2500);
 };
@@ -90,70 +89,93 @@ function renderDock() {
     apps.forEach(app => {
         let el = document.createElement('div');
         el.className = 'dock-item';
-        el.style.backgroundColor = app.color;
-        el.innerHTML = `<i class="fa-solid ${app.icon}"></i><div class="dock-tooltip">${app.name}</div>`;
+        
+        // Handle Real Image vs FontAwesome
+        if(app.iconImg) {
+            el.style.backgroundImage = `url('${app.iconImg}')`;
+            el.style.backgroundColor = 'white'; // White bg for transparent pngs
+        } else {
+            el.style.backgroundColor = app.color;
+            el.innerHTML = `<i class="fa-solid ${app.icon}"></i>`;
+        }
+        
+        el.innerHTML += `<div class="dock-tooltip">${app.name}</div>`;
         el.onclick = () => launchApp(app);
         dock.appendChild(el);
     });
 }
 
 function renderDesktopIcons() {
-    const grid = document.getElementById('desktop-grid');
-    grid.innerHTML = '';
-    apps.forEach(app => {
+    const area = document.getElementById('desktop-area') || createDesktopArea();
+    area.innerHTML = '';
+    
+    // Initial Layout (Grid-like but absolute)
+    let startX = 20;
+    let startY = 40;
+    let gapY = 100;
+
+    apps.forEach((app, index) => {
         let el = document.createElement('div');
         el.className = 'app-icon';
-        el.innerHTML = `
-            <div class="icon-img" style="color:${app.color}"><i class="fa-solid ${app.icon}"></i></div>
-            <span class="icon-label">${app.name}</span>
-        `;
-        el.onclick = () => launchApp(app);
-        grid.appendChild(el);
+        el.style.left = startX + 'px';
+        el.style.top = (startY + (index * gapY)) + 'px'; // Left aligned, stacked vertically
+        
+        // Icon Look
+        let iconContent = '';
+        if(app.iconImg) {
+            iconContent = `<div class="icon-img" style="background-image: url('${app.iconImg}'); background-color: white;"></div>`;
+        } else {
+            iconContent = `<div class="icon-img" style="background-color: ${app.color}"><i class="fa-solid ${app.icon}" style="color:white"></i></div>`;
+        }
+        
+        el.innerHTML = `${iconContent}<span class="icon-label">${app.name}</span>`;
+        
+        // Click to launch, but distinguish from drag
+        let isDragging = false;
+        el.onmousedown = (e) => {
+            isDragging = false;
+            dragElement(e, el, () => { isDragging = true; });
+        };
+        el.onclick = () => { if(!isDragging) launchApp(app); };
+        
+        area.appendChild(el);
     });
 }
 
-// --- LAUNCHER LOGIC ---
+function createDesktopArea() {
+    let div = document.createElement('div');
+    div.id = 'desktop-area';
+    document.getElementById('desktop').insertBefore(div, document.getElementById('windows-area'));
+    return div;
+}
+
+// --- LAUNCHER ---
 function launchApp(app) {
-    if (app.type === 'newtab') {
-        window.open(app.url, '_blank');
-        return;
-    }
+    if (app.type === 'newtab') { window.open(app.url, '_blank'); return; }
 
     let content = '';
-    
-    // TYPE: PROXY
-    if (app.type === 'proxy') {
-        content = `<iframe src="/proxy/${app.url}"></iframe>`;
-    }
-    // TYPE: IFRAME
-    else if (app.type === 'iframe') {
-        content = `<iframe src="${app.url}"></iframe>`;
-    }
-    // TYPE: INTERNAL
-    else if (app.type === 'internal') {
-        content = getInternalApp(app.appName);
-    }
+    if (app.type === 'proxy') content = `<iframe src="/proxy/${app.url}"></iframe>`;
+    else if (app.type === 'internal') content = getInternalApp(app.appName);
 
     createWindow(app.name, content);
 }
 
-// --- INTERNAL APP CONTENTS ---
+// --- INTERNAL APPS ---
 function getInternalApp(name) {
-    if (name === 'js-exec') {
+    if (name === 'creator') {
         return `
-            <div class="terminal">
-                <div id="js-out">VM JS Console v1.0</div>
-                <div style="margin-top:10px; display:flex;">
-                    <span style="color:lime; margin-right:5px;">></span>
-                    <input type="text" onkeydown="if(event.key==='Enter') runJS(this)">
-                </div>
+            <div style="padding:20px; text-align:center;">
+                <h3>Create Desktop App</h3>
+                <input id="new-app-name" placeholder="App Name" style="padding:8px; width:80%; margin-bottom:10px;"><br>
+                <input id="new-app-url" placeholder="https://..." style="padding:8px; width:80%; margin-bottom:10px;"><br>
+                <button onclick="createCustomApp()" style="padding:8px 20px; background:#34C759; color:white; border:none; border-radius:5px;">Add App</button>
             </div>`;
     }
     if (name === 'files') {
         return `
             <div style="padding:10px; display:flex; flex-direction:column; height:100%;">
                 <div style="border-bottom:1px solid #ccc; padding-bottom:5px;">
-                    <button onclick="document.getElementById('f-up').click()">Upload File</button>
+                    <button onclick="document.getElementById('f-up').click()">Upload</button>
                     <input type="file" id="f-up" hidden onchange="handleUpload(this)">
                 </div>
                 <div class="file-grid" id="file-area"></div>
@@ -163,37 +185,70 @@ function getInternalApp(name) {
     if (name === 'about') {
         return `
             <div style="padding:40px; text-align:center;">
-                <h1>VM</h1>
-                <p>VM is a proxy based game made for school.</p>
+                <h1 style="margin-bottom:0;">VM Pro</h1>
+                <p style="color:#888;">Version 2.0</p>
+                <hr style="width:50px; margin:20px auto;">
                 <h3>Made by TikTok Pr0xy</h3>
-                <p>Credits to Luminal OS for inspiration.</p>
+                <p>Designed for School</p>
             </div>`;
     }
     if (name === 'settings') {
         return `
-            <div style="padding:20px;">
-                <h3>Wallpaper Settings</h3>
-                <input type="text" id="wp-in" placeholder="Image URL..." style="width:100%; padding:8px;">
-                <button onclick="saveWP()" style="margin-top:10px;">Save Wallpaper</button>
+            <div style="background:#fff; height:100%;">
+                <div class="settings-header">Appearance</div>
+                <ul class="settings-list">
+                    <li class="settings-item">
+                        <span>Wallpaper</span>
+                        <span style="color:#888;">Default ></span>
+                    </li>
+                    <li class="settings-item">
+                        <span>Dark Mode</span>
+                        <span style="color:#34C759;">On</span>
+                    </li>
+                </ul>
+                <div class="settings-header">System</div>
+                <ul class="settings-list">
+                    <li class="settings-item" onclick="resetVM()">
+                        <span style="color:red;">Reset VM</span>
+                    </li>
+                </ul>
             </div>`;
     }
 }
 
-// --- WINDOW MANAGEMENT ---
+// --- APP CREATOR LOGIC ---
+function createCustomApp() {
+    const name = document.getElementById('new-app-name').value;
+    const url = document.getElementById('new-app-url').value;
+    if(!name || !url) return alert("Enter name and URL!");
+    
+    const newApp = { name: name, icon: "fa-globe", color: "#666", type: "proxy", url: url };
+    apps.push(newApp);
+    
+    // Save to memory so it stays after refresh
+    const currentUsers = JSON.parse(localStorage.getItem('vm_user_apps') || '[]');
+    currentUsers.push(newApp);
+    localStorage.setItem('vm_user_apps', JSON.stringify(currentUsers));
+    
+    renderDesktopIcons();
+    renderDock();
+    alert("App added!");
+}
+
+// --- WINDOWS ---
 let zIndex = 100;
 function createWindow(title, content) {
     zIndex++;
     const win = document.createElement('div');
     win.className = 'window';
     win.style.zIndex = zIndex;
-    win.style.top = (50 + Math.random() * 50) + 'px';
-    win.style.left = (50 + Math.random() * 50) + 'px';
+    win.style.top = '100px'; win.style.left = '200px';
 
     win.innerHTML = `
-        <div class="title-bar" onmousedown="dragStart(event, this.parentElement)">
+        <div class="title-bar" onmousedown="dragElement(event, this.parentElement)">
             <div class="traffic-lights">
                 <div class="light close" onclick="this.closest('.window').remove()"></div>
-                <div class="light min"></div>
+                <div class="light min" onclick="this.closest('.window').style.display='none'"></div>
                 <div class="light max" onclick="toggleMax(this.closest('.window'))"></div>
             </div>
             <div class="window-title">${title}</div>
@@ -203,66 +258,61 @@ function createWindow(title, content) {
 
     document.getElementById('windows-area').appendChild(win);
     win.addEventListener('mousedown', () => win.style.zIndex = ++zIndex);
-    
     if(title === 'File Explorer') setTimeout(renderFiles, 200);
 }
 
-// --- DRAG LOGIC ---
-function dragStart(e, win) {
-    let shiftX = e.clientX - win.getBoundingClientRect().left;
-    let shiftY = e.clientY - win.getBoundingClientRect().top;
-    
-    function moveAt(pageX, pageY) {
-        win.style.left = pageX - shiftX + 'px';
-        win.style.top = pageY - shiftY + 'px';
+// --- DRAG SYSTEM (Universal) ---
+function dragElement(e, elmnt, onMoveCallback) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    e.preventDefault();
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    document.onmousemove = elementDrag;
+
+    function elementDrag(e) {
+        e.preventDefault();
+        // Calculate new cursor position
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // Set element's new position
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        
+        if(onMoveCallback) onMoveCallback(); // Notify that we dragged
     }
-    function onMouseMove(event) { moveAt(event.pageX, event.pageY); }
-    
-    document.addEventListener('mousemove', onMouseMove);
-    document.onmouseup = function() {
-        document.removeEventListener('mousemove', onMouseMove);
+
+    function closeDragElement() {
         document.onmouseup = null;
-    };
+        document.onmousemove = null;
+    }
 }
 
 function toggleMax(win) {
     if(win.style.width === '100%') {
-        win.style.width = '700px'; win.style.height = '500px'; win.style.top = '50px'; win.style.left = '50px';
+        win.style.width = '700px'; win.style.height = '500px'; win.style.top = '100px'; win.style.left = '200px';
     } else {
-        win.style.width = '100%'; win.style.height = 'calc(100vh - 40px)'; win.style.top = '28px'; win.style.left = '0';
+        win.style.width = '100%'; win.style.height = 'calc(100vh - 30px)'; win.style.top = '28px'; win.style.left = '0';
     }
 }
 
-// --- UTILS & FILES ---
+// --- UTILS ---
 function updateClock() {
     const now = new Date();
-    let hours = now.getHours();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    const mins = now.getMinutes().toString().padStart(2, '0');
-    document.getElementById('clock').innerText = `${hours}:${mins} ${ampm}`;
+    document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     setTimeout(updateClock, 1000);
 }
 
-function saveWP() {
-    const url = document.getElementById('wp-in').value;
-    localStorage.setItem('vm_wallpaper', url);
-    document.getElementById('desktop').style.backgroundImage = `url('${url}')`;
-}
-
-function runJS(input) {
-    const out = document.getElementById('js-out');
-    try {
-        out.innerHTML += `<div style="color:white">> ${input.value}</div>`;
-        const res = eval(input.value);
-        out.innerHTML += `<div style="color:#aaa">< ${res}</div>`;
-    } catch(e) {
-        out.innerHTML += `<div style="color:red">Error: ${e.message}</div>`;
+function resetVM() {
+    if(confirm("Reset all settings and files?")) {
+        localStorage.clear();
+        location.reload();
     }
-    input.value = '';
 }
 
-// File System Simulation
+// File System
 let myFiles = JSON.parse(localStorage.getItem('vm_files') || '[]');
 function handleUpload(input) {
     const file = input.files[0];
@@ -281,10 +331,20 @@ function renderFiles() {
     myFiles.forEach(f => {
         let div = document.createElement('div');
         div.className = 'file-card';
-        div.innerHTML = `<i class="fa-solid fa-file" style="font-size:30px;color:#007AFF"></i><br><span>${f.name}</span>`;
-        div.onclick = () => {
+        // Add "Set Wallpaper" button for images
+        let wpBtn = (f.name.endsWith('.jpg') || f.name.endsWith('.png')) 
+            ? `<br><button style="font-size:10px; margin-top:5px;" onclick="setWP('${f.data}')">Set Wallpaper</button>` 
+            : '';
+        
+        div.innerHTML = `<i class="fa-solid fa-file" style="font-size:30px;color:#007AFF"></i><br><span>${f.name}</span>${wpBtn}`;
+        div.onclick = (e) => {
+            if(e.target.tagName === 'BUTTON') return; // Don't download if clicking Set WP
             let a = document.createElement('a'); a.href = f.data; a.download = f.name; a.click();
         };
         area.appendChild(div);
     });
+}
+function setWP(data) {
+    localStorage.setItem('vm_wallpaper', data);
+    document.getElementById('desktop').style.backgroundImage = `url('${data}')`;
 }
