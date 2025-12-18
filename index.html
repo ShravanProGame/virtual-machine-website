@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classroom Helper</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-    <div id="launcher-screen">
-        <button id="launch-btn">Click to Launch</button>
-    </div>
-
-    <div id="desktop-container" style="display:none;">
+    <div id="desktop-container">
+        
         <div id="windows-area"></div>
         
         <div class="desktop-icons" id="app-grid"></div>
@@ -27,16 +24,17 @@
         </div>
 
         <div id="settings-menu" class="hidden">
-            <button onclick="cloak('Google Drive')">Cloak: Drive</button>
-            <button onclick="cloak('Gmail')">Cloak: Gmail</button>
-            <button onclick="cloak('Canvas')">Cloak: Canvas</button>
+            <div class="menu-item" onclick="cloak('Google Drive')">Cloak: Drive</div>
+            <div class="menu-item" onclick="cloak('Gmail')">Cloak: Gmail</div>
+            <div class="menu-item" onclick="cloak('Canvas')">Cloak: Canvas</div>
+            <div class="menu-item" onclick="window.location.href='https://google.com'">Exit (Panic)</div>
         </div>
 
         <div id="add-app-modal" class="hidden modal">
             <div class="modal-content">
-                <h3>Add App</h3>
-                <input type="text" id="new-app-name" placeholder="Name">
-                <input type="text" id="new-app-url" placeholder="https://...">
+                <h3>Add New App</h3>
+                <input type="text" id="new-app-name" placeholder="App Name">
+                <input type="text" id="new-app-url" placeholder="https://example.com">
                 <br><br>
                 <button onclick="saveNewApp()">Save</button>
                 <button onclick="toggleAddApp()">Cancel</button>
