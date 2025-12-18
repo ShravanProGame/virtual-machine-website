@@ -3,38 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebOS Pro</title>
+    <title>VM</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
     <div id="boot-screen">
-        <div id="boot-logo">🍎</div>
-        <div id="boot-text">System Loading...</div>
+        <div class="boot-icon"><i class="fa-brands fa-apple"></i></div>
+        <div class="loading-bar"><div class="progress"></div></div>
     </div>
 
     <div id="desktop">
         
-        <div id="menubar">
-            <div class="left-menu">
-                <span>🍎</span>
-                <span>Finder</span>
+        <div class="top-bar">
+            <div class="left">
+                <span class="apple-logo"><i class="fa-brands fa-apple"></i></span>
+                <span style="font-weight: 700;">VM</span>
                 <span>File</span>
                 <span>Edit</span>
                 <span>View</span>
+                <span>Go</span>
+                <span>Help</span>
             </div>
-            <div class="right-menu">
+            <div class="right">
+                <i class="fa-solid fa-wifi"></i>
+                <i class="fa-solid fa-battery-full"></i>
                 <span id="clock">12:00 PM</span>
             </div>
         </div>
 
-        <div id="icon-container"></div>
+        <div id="desktop-grid"></div>
 
         <div id="windows-area"></div>
 
-        <div id="dock-container">
+        <div class="dock-container">
             <div id="dock"></div>
         </div>
+
     </div>
 
     <script src="script.js"></script>
