@@ -5,7 +5,7 @@ const apps = [
         icon: "fa-compass",
         color: "#007AFF",
         type: "proxy",
-        url: "https://www.bing.com"
+        url: "https://en.wikipedia.org/wiki/Main_Page" // Changed to Wikipedia for better testing
     },
     {
         name: "AI Chat",
@@ -121,15 +121,15 @@ function launchApp(app) {
 
     let content = '';
     
-    // TYPE: PROXY (Runs through your server.js)
+    // TYPE: PROXY
     if (app.type === 'proxy') {
         content = `<iframe src="/proxy/${app.url}"></iframe>`;
     }
-    // TYPE: IFRAME (Direct Embed)
+    // TYPE: IFRAME
     else if (app.type === 'iframe') {
         content = `<iframe src="${app.url}"></iframe>`;
     }
-    // TYPE: INTERNAL (Custom HTML apps)
+    // TYPE: INTERNAL
     else if (app.type === 'internal') {
         content = getInternalApp(app.appName);
     }
@@ -204,7 +204,6 @@ function createWindow(title, content) {
     document.getElementById('windows-area').appendChild(win);
     win.addEventListener('mousedown', () => win.style.zIndex = ++zIndex);
     
-    // Trigger file render if needed
     if(title === 'File Explorer') setTimeout(renderFiles, 200);
 }
 
