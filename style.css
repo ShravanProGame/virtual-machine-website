@@ -30,18 +30,24 @@ body { margin: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFo
 .top-bar .left span { margin-right: 15px; cursor: pointer; }
 .top-bar .right { display: flex; gap: 15px; align-items: center; }
 
-/* --- ICONS GRID --- */
-#desktop-grid {
-    padding: 50px 20px; display: flex; flex-direction: column; flex-wrap: wrap;
-    align-content: flex-end; /* Mac style: icons on right */
-    height: 80vh; gap: 20px; pointer-events: none; /* Let clicks pass through */
+/* --- ICONS (New Draggable System) --- */
+#desktop-area {
+    width: 100%; height: 100%; position: absolute; top: 0; left: 0;
 }
 .app-icon {
-    width: 80px; text-align: center; color: white; cursor: pointer; pointer-events: auto;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.8); transition: 0.2s;
+    width: 80px; position: absolute; /* Allows dragging */
+    text-align: center; color: white; cursor: pointer;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    display: flex; flex-direction: column; align-items: center;
 }
 .app-icon:hover { opacity: 0.8; }
-.icon-img { font-size: 45px; margin-bottom: 5px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.4)); }
+.icon-img { 
+    width: 48px; height: 48px; border-radius: 10px; margin-bottom: 5px; 
+    background-size: cover; background-position: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: #333;
+}
 .icon-label { font-size: 12px; background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; }
 
 /* --- WINDOWS --- */
@@ -77,20 +83,31 @@ iframe { width: 100%; height: 100%; border: none; }
     padding: 10px 15px; border-radius: 20px; display: flex; gap: 15px; align-items: flex-end;
 }
 .dock-item {
-    width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-size: 28px; color: white; cursor: pointer; transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    width: 50px; height: 50px; border-radius: 12px; 
+    background-size: cover; background-position: center;
+    cursor: pointer; transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: center; font-size: 24px; color: #333;
 }
 .dock-item:hover { transform: scale(1.2) translateY(-10px); margin: 0 5px; }
 .dock-tooltip {
     position: absolute; top: -40px; background: rgba(0,0,0,0.8); color: white;
     padding: 4px 8px; border-radius: 5px; font-size: 12px; opacity: 0; pointer-events: none; transition: 0.2s;
+    white-space: nowrap;
 }
 .dock-item:hover .dock-tooltip { opacity: 1; top: -50px; }
 
-/* --- INTERNAL APPS CSS --- */
+/* --- INTERNAL APPS STYLES --- */
 .terminal { background: #1e1e1e; color: #00ff00; padding: 10px; font-family: monospace; height: 100%; overflow-y: auto; }
-.terminal input { background: transparent; border: none; color: white; outline: none; width: 100%; }
-.file-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; }
-.file-card { text-align: center; cursor: pointer; }
-.file-card:hover { background: #eee; border-radius: 5px; }
+.file-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 15px; }
+.file-card { text-align: center; cursor: pointer; padding: 10px; border-radius: 8px; transition: 0.2s; }
+.file-card:hover { background: #f0f0f0; }
+
+/* Settings App Style */
+.settings-list { list-style: none; padding: 0; margin: 0; }
+.settings-item { 
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 20px; border-bottom: 1px solid #eee; cursor: pointer;
+}
+.settings-item:hover { background: #f9f9f9; }
+.settings-header { background: #f2f2f7; padding: 10px 20px; font-weight: bold; color: #666; font-size: 12px; text-transform: uppercase; }
