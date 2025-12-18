@@ -3,14 +3,12 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware to serve static files (CSS, JS, Images)
 app.use(express.static(__dirname));
 
-// Main route to serve the OS
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`System online on port ${PORT}`);
 });
