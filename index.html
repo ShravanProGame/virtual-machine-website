@@ -3,43 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>VM</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
     <div id="desktop-container">
         
+        <div class="top-bar">
+            <div class="top-left">
+                <div class="apple-logo" onclick="openSearch()"><i class="fa-brands fa-apple"></i></div>
+                <div onclick="openSearch()" style="cursor:pointer; font-weight:bold;">VM</div>
+                <div onclick="openWindow(defaultApps.find(a => a.name === 'File Explorer'))" style="cursor:pointer;">File</div>
+                <div onclick="openWindow(defaultApps.find(a => a.name === 'Settings'))" style="cursor:pointer;">Edit</div>
+                <div onclick="openWindow(defaultApps.find(a => a.name === 'About'))" style="cursor:pointer;">Help</div>
+            </div>
+            <div class="top-right">
+                <i class="fa-solid fa-battery-full"></i>
+                <i class="fa-solid fa-wifi"></i>
+                <span id="clock">12:00 PM</span>
+            </div>
+        </div>
+
+        <div id="search-overlay">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fa-solid fa-magnifying-glass" style="color:#aaa; font-size:20px;"></i>
+                <input type="text" id="search-input" placeholder="Spotlight Search" onkeyup="handleSearch()">
+            </div>
+            <div id="search-results" style="margin-top:10px;"></div>
+        </div>
+
         <div id="windows-area"></div>
-        
-        <div class="desktop-icons" id="app-grid"></div>
 
-        <div class="taskbar">
-            <button id="start-btn"><i class="fa-brands fa-windows"></i></button>
-            <div class="taskbar-apps" id="taskbar-apps"></div>
-            <div class="system-tray">
-                <span id="clock">12:00</span>
-            </div>
+        <div class="dock-container">
+            <div class="dock" id="dock">
+                </div>
         </div>
 
-        <div id="settings-menu" class="hidden">
-            <div class="menu-item" onclick="cloak('Google Drive')">Cloak: Drive</div>
-            <div class="menu-item" onclick="cloak('Gmail')">Cloak: Gmail</div>
-            <div class="menu-item" onclick="cloak('Canvas')">Cloak: Canvas</div>
-            <div class="menu-item" onclick="window.location.href='https://google.com'">Exit (Panic)</div>
-        </div>
-
-        <div id="add-app-modal" class="hidden modal">
-            <div class="modal-content">
-                <h3>Add New App</h3>
-                <input type="text" id="new-app-name" placeholder="App Name">
-                <input type="text" id="new-app-url" placeholder="https://example.com">
-                <br><br>
-                <button onclick="saveNewApp()">Save</button>
-                <button onclick="toggleAddApp()">Cancel</button>
-            </div>
-        </div>
     </div>
 
     <script src="script.js"></script>
