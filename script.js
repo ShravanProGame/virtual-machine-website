@@ -1,33 +1,32 @@
 /* --- CONFIGURATION & APPS --- */
-// Defines every app on the system.
 const apps = [
     {
         name: "Browser",
         icon: "fa-compass",
         color: "#007AFF",
         type: "proxy",
-        url: "https://duckduckgo.com" // Starts with DuckDuckGo via Proxy
+        url: "https://duckduckgo.com"
     },
     {
         name: "AI Chat",
         icon: "fa-robot",
         color: "#AF52DE",
         type: "proxy",
-        url: "https://chatbotchatapp.com/" // The specific AI you asked for
+        url: "https://chatbotchatapp.com/"
     },
     {
         name: "Math Game",
         icon: "fa-calculator",
         color: "#FF9500",
         type: "proxy",
-        url: "https://gn-math2-16737703.codehs.me/" // The specific Math link
+        url: "https://gn-math2-16737703.codehs.me/"
     },
     {
         name: "Python",
         icon: "fa-brands fa-python",
         color: "#306998",
         type: "iframe",
-        url: "https://trinket.io/embed/python3/a5bd54189b" // Python Executor
+        url: "https://trinket.io/embed/python3/a5bd54189b"
     },
     {
         name: "JS Exec",
@@ -40,7 +39,7 @@ const apps = [
         name: "Beech Watch",
         icon: "fa-shield-cat",
         color: "#FF2D55",
-        type: "newtab", // Complex sites often need new tabs to work 100%
+        type: "newtab", 
         url: "https://beech.watch/"
     },
     {
@@ -68,16 +67,13 @@ const apps = [
 
 // --- BOOT & INIT ---
 window.onload = function() {
-    // 1. Load Wallpaper
     const savedWP = localStorage.getItem('vm_wallpaper');
     if(savedWP) document.getElementById('desktop').style.backgroundImage = `url('${savedWP}')`;
 
-    // 2. Render Interface
     renderDock();
     renderDesktopIcons();
     updateClock();
 
-    // 3. Boot Animation
     setTimeout(() => {
         document.getElementById('boot-screen').style.opacity = '0';
         setTimeout(() => {
