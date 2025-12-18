@@ -1,107 +1,53 @@
-// --- 1. Configuration ---
+// --- 1. Configuration & Storage ---
 let defaultApps = JSON.parse(localStorage.getItem('userApps')) || [
     { name: "Browser", url: "https://skibidiboi333.zjhmz.cn/", icon: "fa-globe" },
-    { name: "Bing", url: "https://www.bing.com/search?q=search", icon: "fa-search" }, 
+    { name: "Bing", url: "https://www.bing.com/search?q=search", icon: "fa-search" },
     { name: "Soundboard", url: "https://soundboardly.com/", icon: "fa-music" },
     { name: "Chat", url: "https://canvas-x68p.onrender.com/", icon: "fa-comments" },
     { name: "Drawing", type: "drawing", icon: "fa-paint-brush" },
     { name: "Add App", action: "toggleAddApp", icon: "fa-plus" }
 ];
 
-// --- 2. The Bulletproof Launch Logic ---
-const launchBtn = document.getElementById('launch-btn');
-
-if (launchBtn) {
-    launchBtn.addEventListener('click', async () => {
-        // A. Fetch the raw text of the CSS and JS files
-        // This ensures we don't rely on broken links in the new tab
-        const cssContent = await fetch('style.css').then(res => res.text());
-        const jsContent = await fetch('script.js').then(res => res.text());
-        const htmlBody = document.body.innerHTML;
-
-        // B. Open the blank tab
-        const win = window.open('about:blank', '_blank');
-        if (!win) return alert("Please allow popups!");
-
-        // C. Construct the new page entirely from text
-        // We set a flag 'window.IS_CLOAKED = true' so the script knows it's inside the cloak
-        win.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Google Drive</title>
-                <link rel="icon" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-                <style>${cssContent}</style>
-            </head>
-            <body>
-                ${htmlBody}
-                <script>
-                    window.IS_CLOAKED = true;
-                    ${jsContent}
-                </script>
-            </body>
-            </html>
-        `);
-        
-        win.document.close();
-
-        // D. Redirect original tab to Google
-        window.location.replace("https://google.com");
-    });
-}
-
-// --- 3. Startup Logic (Runs automatically) ---
-// This checks if we are inside the cloaked window or the normal one
-if (window.IS_CLOAKED) {
-    // We are inside the cloaked tab: Show Desktop immediately
-    document.getElementById('launcher-screen').style.display = 'none';
-    document.getElementById('desktop-container').style.display = 'block';
-    
-    // Initialize everything
+// --- 2. Startup (Auto Launch) ---
+window.onload = function() {
     renderIcons();
     updateClock();
-    openWindow(defaultApps[0]); // Auto-open browser
-} else {
-    // We are on the main site: Show Launcher
-    if(document.getElementById('launcher-screen')) {
-        document.getElementById('launcher-screen').style.display = 'flex';
-        document.getElementById('desktop-container').style.display = 'none';
-    }
-}
+    
+    // Auto-open the main browser on load
+    openWindow(defaultApps[0]);
+};
 
-// --- 4. Core Desktop Functions ---
+// --- 3. Rendering Apps ---
 function renderIcons() {
     const grid = document.getElementById('app-grid');
     const taskbar = document.getElementById('taskbar-apps');
-    if(!grid) return;
     
     grid.innerHTML = '';
     taskbar.innerHTML = '';
 
     defaultApps.forEach(app => {
-        let iconHtml = app.icon.startsWith('fa') ? `<i class="fa-solid ${app.icon}"></i>` : `<img src="${app.icon}">`;
+        let iconHtml = app.icon.startsWith('fa') ? 
+            `<i class="fa-solid ${app.icon}"></i>` : 
+            `<img src="${app.icon}">`;
         
+        // Desktop Icon
         let el = document.createElement('div');
         el.className = 'app-icon';
         el.innerHTML = `${iconHtml}<span>${app.name}</span>`;
-        // Use a safe onclick handler
-        el.onclick = function() {
-            if (app.action === 'toggleAddApp') toggleAddApp();
-            else openWindow(app);
-        };
+        el.onclick = () => app.action ? window[app.action]() : openWindow(app);
         grid.appendChild(el);
 
+        // Taskbar Icon (only if it's a real app)
         if (!app.action) {
             let tbEl = document.createElement('button');
             tbEl.innerHTML = iconHtml;
-            tbEl.onclick = function() { openWindow(app); };
+            tbEl.onclick = () => openWindow(app);
             taskbar.appendChild(tbEl);
         }
     });
 }
 
-// --- 5. Window System ---
+// --- 4. Window System ---
 let zIndex = 100;
 
 function openWindow(app) {
@@ -109,14 +55,15 @@ function openWindow(app) {
     const win = document.createElement('div');
     win.className = 'window';
     win.style.zIndex = zIndex;
-    win.style.top = (50 + (zIndex % 10 * 20)) + 'px';
-    win.style.left = (50 + (zIndex % 10 * 20)) + 'px';
+    // Random offset so windows don't stack perfectly on top of each other
+    win.style.top = (50 + (Math.random() * 50)) + 'px';
+    win.style.left = (50 + (Math.random() * 50)) + 'px';
 
     let content = '';
     if (app.type === 'drawing') {
         content = `
             <div style="height:100%; display:flex; flex-direction:column;">
-                <div style="background:#eee; padding:5px;">
+                <div style="background:#eee; padding:5px; border-bottom:1px solid #ccc;">
                     <button onclick="saveDrawing(this)">Download</button>
                     <button onclick="clearCanvas(this)">Clear</button>
                 </div>
@@ -140,36 +87,41 @@ function openWindow(app) {
 
     document.getElementById('windows-area').appendChild(win);
     win.addEventListener('mousedown', () => win.style.zIndex = ++zIndex);
-    
+
     if (app.type === 'drawing') {
-        setTimeout(() => initCanvas(win.querySelector('canvas')), 100);
+        setTimeout(() => initCanvas(win.querySelector('canvas')), 50);
     }
 }
 
 function maximizeWindow(btn) {
     const win = btn.closest('.window');
     if (win.style.width === '100vw') {
-        win.style.width = '600px'; win.style.height = '400px'; 
-        win.style.top = '50px'; win.style.left = '50px';
+        win.style.width = '700px'; 
+        win.style.height = '500px'; 
+        win.style.top = '50px'; 
+        win.style.left = '50px';
     } else {
-        win.style.width = '100vw'; win.style.height = 'calc(100vh - 45px)'; 
-        win.style.top = '0'; win.style.left = '0';
+        win.style.width = '100vw'; 
+        win.style.height = 'calc(100vh - 45px)'; 
+        win.style.top = '0'; 
+        win.style.left = '0';
     }
 }
 
-// --- 6. Helpers (Drag, Clock, Settings) ---
+// --- 5. Dragging Logic ---
 function dragWindow(e, win) {
     if(e.target.classList.contains('circle')) return;
+    
     let shiftX = e.clientX - win.getBoundingClientRect().left;
     let shiftY = e.clientY - win.getBoundingClientRect().top;
-    
+
     function moveAt(pageX, pageY) {
         win.style.left = pageX - shiftX + 'px';
         win.style.top = pageY - shiftY + 'px';
     }
-    
+
     function onMouseMove(event) { moveAt(event.pageX, event.pageY); }
-    
+
     document.addEventListener('mousemove', onMouseMove);
     document.onmouseup = function() {
         document.removeEventListener('mousemove', onMouseMove);
@@ -177,50 +129,32 @@ function dragWindow(e, win) {
     };
 }
 
-function updateClock() {
-    const el = document.getElementById('clock');
-    if (el) el.innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    setTimeout(updateClock, 1000);
-}
+// --- 6. Settings & Cloaking ---
+document.getElementById('start-btn').onclick = () => {
+    document.getElementById('settings-menu').classList.toggle('visible');
+};
 
-// Settings Toggle
-const startBtn = document.getElementById('start-btn');
-if(startBtn) {
-    startBtn.onclick = () => {
-        const menu = document.getElementById('settings-menu');
-        if(menu) menu.classList.toggle('visible');
-    };
-}
-
-// Cloak Function
 window.cloak = function(type) {
+    const link = document.querySelector("link[rel~='icon']") || document.createElement('link');
+    link.rel = 'icon';
+    document.getElementsByTagName('head')[0].appendChild(link);
+
     if (type === 'Google Drive') {
         document.title = "My Drive - Google Drive";
-        changeFavicon("https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png");
+        link.href = "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png";
     } else if (type === 'Gmail') {
         document.title = "Inbox (1) - Gmail";
-        changeFavicon("https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico");
+        link.href = "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico";
     } else if (type === 'Canvas') {
         document.title = "Dashboard";
-        changeFavicon("https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico");
+        link.href = "https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico";
     }
-}
+    // Hide menu after clicking
+    document.getElementById('settings-menu').classList.remove('visible');
+};
 
-function changeFavicon(src) {
-    let link = document.querySelector("link[rel~='icon']");
-    if (!link) {
-        link = document.createElement('link');
-        link.rel = 'icon';
-        document.getElementsByTagName('head')[0].appendChild(link);
-    }
-    link.href = src;
-}
-
-// Add App Modal
-window.toggleAddApp = function() {
-    const modal = document.getElementById('add-app-modal');
-    if(modal) modal.classList.toggle('hidden');
-}
+// --- 7. Custom App & Drawing ---
+window.toggleAddApp = () => document.getElementById('add-app-modal').classList.toggle('hidden');
 
 window.saveNewApp = function() {
     const name = document.getElementById('new-app-name').value;
@@ -233,7 +167,6 @@ window.saveNewApp = function() {
     }
 }
 
-// Drawing Logic
 function initCanvas(canvas) {
     if(!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -270,4 +203,10 @@ window.clearCanvas = function(btn) {
     const canvas = btn.parentElement.nextElementSibling;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function updateClock() {
+    const el = document.getElementById('clock');
+    if (el) el.innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    setTimeout(updateClock, 1000);
 }
