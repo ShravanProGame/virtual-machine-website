@@ -1,0 +1,68 @@
+body { margin: 0; overflow: hidden; font-family: sans-serif; background: #2c3e50; }
+
+/* Launcher */
+#launcher-screen {
+    height: 100vh; display: flex; justify-content: center; align-items: center; background: #000;
+}
+#launch-btn {
+    padding: 15px 30px; font-size: 20px; cursor: pointer; background: #0078d4; color: white; border: none; border-radius: 5px;
+}
+
+/* Desktop */
+#desktop-container {
+    width: 100vw; height: 100vh; background: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
+    position: relative;
+}
+
+/* App Grid */
+.desktop-icons {
+    padding: 20px; display: flex; flex-direction: column; gap: 15px; flex-wrap: wrap; height: 80%; width: 100px;
+}
+.app-icon {
+    width: 80px; text-align: center; color: white; cursor: pointer; text-shadow: 1px 1px 2px black;
+}
+.app-icon img, .app-icon i {
+    width: 48px; height: 48px; display: block; margin: 0 auto 5px; font-size: 40px;
+}
+
+/* Taskbar */
+.taskbar {
+    position: absolute; bottom: 0; width: 100%; height: 45px; background: rgba(20, 20, 20, 0.9);
+    display: flex; align-items: center; padding: 0 10px; z-index: 1000; backdrop-filter: blur(10px);
+}
+.taskbar button {
+    background: none; border: none; color: white; font-size: 20px; padding: 0 15px; cursor: pointer;
+}
+.taskbar-apps { flex-grow: 1; display: flex; gap: 10px; margin-left: 10px; }
+.system-tray { color: white; margin-right: 20px; font-size: 14px; }
+
+/* Windows */
+.window {
+    position: absolute; width: 600px; height: 400px; background: white; border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; resize: both; overflow: auto;
+    top: 50px; left: 50px; min-width: 200px; min-height: 150px;
+}
+.title-bar {
+    height: 30px; background: #e0e0e0; display: flex; align-items: center; padding: 0 10px; cursor: move; border-radius: 8px 8px 0 0;
+}
+.controls { display: flex; gap: 8px; }
+.circle { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; }
+.red { background: #ff5f56; }
+.yellow { background: #ffbd2e; }
+.green { background: #27c93f; }
+.window-title { margin-left: 15px; font-size: 14px; color: #333; pointer-events: none;}
+.window-content { flex-grow: 1; border: none; background: #fff; }
+iframe { width: 100%; height: 100%; border: none; }
+
+/* Settings Menu */
+#settings-menu {
+    position: absolute; bottom: 50px; left: 10px; background: #333; padding: 10px; border-radius: 5px; color: white; display: none;
+}
+#settings-menu.visible { display: block; }
+#settings-menu button { display: block; width: 100%; margin: 5px 0; background: #555; border: none; padding: 8px; color: white; cursor: pointer; }
+
+/* Modal */
+.modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center;}
+.hidden { display: none !important; }
+.modal-content { background: white; padding: 20px; border-radius: 8px; width: 300px; text-align: center;}
+.modal-content input { width: 90%; margin: 5px 0; padding: 8px; }
