@@ -5,7 +5,7 @@ const apps = [
         icon: "fa-compass",
         color: "#007AFF",
         type: "proxy",
-        url: "https://duckduckgo.com"
+        url: "https://www.bing.com"
     },
     {
         name: "AI Chat",
