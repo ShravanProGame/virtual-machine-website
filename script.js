@@ -1,68 +1,58 @@
 /* --- CONFIGURATION --- */
 const apps = [
     {
-        name: "Google", // Changed to Google as it's often more stable in proxies
-        iconImg: "https://upload.wikimedia.org/wikipedia/commons/2/2d/Google-favicon-2015.png",
-        type: "proxy",
-        url: "https://www.google.com/search?igu=1"
-    },
-    {
-        name: "Bing",
-        iconImg: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Bing_Fluent_Logo.svg",
-        type: "proxy",
-        url: "https://www.bing.com"
-    },
-    {
-        name: "DuckDuckGo",
-        iconImg: "https://upload.wikimedia.org/wikipedia/commons/d/d2/DuckDuckGo_Logo.svg",
-        type: "proxy",
-        url: "https://duckduckgo.com"
+        name: "Browser",
+        icon: "fa-globe",
+        color: "#29B6F6",
+        type: "iframe", // Direct iframe for external proxy
+        url: "https://skibidiboi333.zjhmz.cn/"
     },
     {
         name: "Games",
         icon: "fa-gamepad",
-        color: "#9C27B0", // Purple
-        type: "proxy",
-        url: "https://v6p9d9t4.ssl.hwcdn.net/html/1865529/index.html"
+        color: "#7E57C2",
+        type: "iframe",
+        url: "https://gn-math2-16737703.codehs.me/"
     },
     {
-        name: "Terminal", // Python
-        icon: "fa-terminal",
-        color: "#212121",
-        type: "internal",
-        appName: "terminal"
+        name: "YouTube",
+        icon: "fa-brands fa-youtube",
+        color: "#FF0000",
+        type: "iframe",
+        // Using the skibidi proxy to load YouTube safely
+        url: "https://skibidiboi333.zjhmz.cn/service/hvtrs8%2F-wuw%2Cymuvu%60e%2Ccmm-"
     },
     {
-        name: "Java Code",
-        icon: "fa-code",
-        color: "#F57F17", // Orange
-        type: "internal",
-        appName: "java"
+        name: "FN Tracker",
+        icon: "fa-crosshairs",
+        color: "#FDD835", 
+        type: "proxy", // Use OUR proxy for this standard site
+        url: "https://fortnitetracker.com/"
     },
     {
-        name: "Add Link",
+        name: "Add App",
         icon: "fa-plus",
-        color: "#4CAF50", // Green
+        color: "#4CAF50",
         type: "internal",
         appName: "creator"
     },
     {
-        name: "File Explorer",
-        icon: "fa-folder-open",
-        color: "#03A9F4", // Blue
+        name: "Files",
+        icon: "fa-folder",
+        color: "#FFA726",
         type: "internal",
         appName: "files"
     },
     {
         name: "Settings",
         icon: "fa-gear",
-        color: "#607D8B", // Grey
+        color: "#546E7A",
         type: "internal",
         appName: "settings"
     },
     {
         name: "About",
-        icon: "fa-circle-info",
+        icon: "fa-info",
         color: "#333",
         type: "internal",
         appName: "about"
@@ -71,10 +61,9 @@ const apps = [
 
 // --- INIT ---
 window.onload = function() {
-    // Load Wallpaper
     const savedWP = localStorage.getItem('vm_wallpaper');
     if(savedWP) document.getElementById('desktop').style.backgroundImage = `url('${savedWP}')`;
-
+    
     // Load User Apps
     const userApps = JSON.parse(localStorage.getItem('vm_user_apps') || '[]');
     userApps.forEach(a => apps.push(a));
@@ -83,74 +72,58 @@ window.onload = function() {
     renderDock();
     updateClock();
 
-    // Boot Sequence
+    // Fade In
     setTimeout(() => {
         document.getElementById('boot-screen').style.opacity = '0';
         setTimeout(() => {
             document.getElementById('boot-screen').style.display = 'none';
-            document.getElementById('desktop').style.opacity = '1';
         }, 1000);
     }, 1500);
 };
 
-// --- GRID SYSTEM (Left Aligned, Top-to-Bottom) ---
+// --- DESKTOP RENDER (Double Click Logic) ---
 function renderDesktop() {
     const area = document.getElementById('desktop-area');
     area.innerHTML = '';
     
-    // Grid Math
-    const startX = 20;
-    const startY = 60;
-    const cellW = 90;
-    const cellH = 110;
-    const maxRows = Math.floor((window.innerHeight - 100) / cellH);
+    // Grid Logic
+    const startX = 20; const startY = 20;
+    const cellH = 100; const maxRows = Math.floor((window.innerHeight - 80) / cellH);
 
     apps.forEach((app, index) => {
-        // Calculate Column and Row
         const col = Math.floor(index / maxRows);
         const row = index % maxRows;
 
         const el = document.createElement('div');
         el.className = 'app-icon';
-        el.style.left = (startX + (col * cellW)) + 'px';
+        el.style.left = (startX + (col * 100)) + 'px';
         el.style.top = (startY + (row * cellH)) + 'px';
 
-        // Render Icon (Image or FontAwesome)
-        let iconHtml = '';
-        if(app.iconImg) {
-            iconHtml = `<div class="icon-img" style="background-image: url('${app.iconImg}'); background-color: white;"></div>`;
-        } else {
-            iconHtml = `<div class="icon-img" style="background-color: ${app.color}"><i class="fa-solid ${app.icon}"></i></div>`;
-        }
+        let iconHtml = app.iconImg 
+            ? `<div class="icon-img" style="background-image: url('${app.iconImg}'); background-color: white;"></div>`
+            : `<div class="icon-img" style="background-color: ${app.color}"><i class="fa-solid ${app.icon}"></i></div>`;
 
         el.innerHTML = `${iconHtml}<span class="icon-label">${app.name}</span>`;
         
-        // Drag Handling
+        // DRAG LOGIC
         let isDragging = false;
-        el.onmousedown = (e) => { 
-            isDragging = false; 
-            dragElement(e, el, () => isDragging = true); 
-        };
-        el.onclick = () => { if(!isDragging) launchApp(app); };
+        el.onmousedown = (e) => { isDragging = false; dragElement(e, el, () => isDragging = true); };
+        
+        // DOUBLE CLICK TO OPEN
+        el.ondblclick = () => { if(!isDragging) launchApp(app); };
 
         area.appendChild(el);
     });
 }
 
 function renderDock() {
-    const dock = document.getElementById('dock');
+    const dock = document.getElementById('dock-icons');
     dock.innerHTML = '';
-    // Show first 7 apps
-    apps.slice(0, 7).forEach(app => {
+    apps.slice(0, 6).forEach(app => {
         const el = document.createElement('div');
         el.className = 'dock-item';
-        if(app.iconImg) {
-            el.style.backgroundImage = `url('${app.iconImg}')`;
-            el.style.backgroundColor = 'white';
-        } else {
-            el.style.backgroundColor = app.color;
-            el.innerHTML = `<i class="fa-solid ${app.icon}"></i>`;
-        }
+        el.innerHTML = `<i class="fa-solid ${app.icon}" style="color:${app.color}"></i>`;
+        // Dock is SINGLE click
         el.onclick = () => launchApp(app);
         dock.appendChild(el);
     });
@@ -159,97 +132,105 @@ function renderDock() {
 // --- APP LAUNCHER ---
 function launchApp(app) {
     let content = '';
-    
-    if (app.type === 'proxy') {
-        // Clean URL to ensure it works
-        const cleanUrl = app.url.startsWith('http') ? app.url : 'https://' + app.url;
-        content = `<iframe src="/proxy/${cleanUrl}" style="background:white;"></iframe>`;
-    } 
-    else if (app.type === 'internal') {
-        content = getInternalApp(app.appName);
-    }
+    if (app.type === 'iframe') content = `<iframe src="${app.url}"></iframe>`;
+    else if (app.type === 'proxy') content = `<iframe src="/proxy/${app.url}"></iframe>`;
+    else if (app.type === 'internal') content = getInternalApp(app.appName);
 
     createWindow(app.name, content);
 }
 
-// --- INTERNAL APPS ---
 function getInternalApp(name) {
-    if(name === 'terminal') return `<div style="background:black; color:#0f0; height:100%; padding:10px; font-family:monospace;">Welcome to PyTerm<br>> <input style="background:transparent; border:none; color:#0f0; outline:none;" onkeydown="if(event.key=='Enter') this.parentElement.innerHTML += '<br>> ' + this.value + '<br>Command not found<br>> '"></div>`;
-    
-    if(name === 'java') return `<div style="display:flex; flex-direction:column; height:100%;"><textarea id="js-code" style="flex:1; background:#282c34; color:#abb2bf; padding:10px; border:none;">alert("Hello");</textarea><button onclick="try{eval(document.getElementById('js-code').value)}catch(e){alert(e)}" style="padding:10px; background:#e06c75; color:white; border:none;">RUN</button></div>`;
-    
-    if(name === 'creator') return `<div style="padding:20px; text-align:center;"><h3>Add App</h3><input id="new-name" placeholder="Name" style="padding:5px;"><br><br><input id="new-url" placeholder="URL" style="padding:5px;"><br><br><button onclick="addApp()" style="padding:8px 20px; background:green; color:white; border:none;">ADD</button></div>`;
-    
-    if(name === 'settings') return `<div style="padding:20px;"><h3>Settings</h3><button onclick="localStorage.clear(); location.reload()" style="background:red; color:white; padding:10px; border:none; width:100%;">RESET EVERYTHING</button></div>`;
-    
-    if(name === 'files') return `<div style="padding:20px;"><h3>Files</h3><input type="file" onchange="const r=new FileReader();r.onload=e=>{let d=document.createElement('div');d.innerHTML=this.files[0].name;document.getElementById('flist').appendChild(d)};r.readAsDataURL(this.files[0])"><div id="flist" style="margin-top:20px;"></div></div>`;
-    
-    return `<div style="padding:20px;">App Error</div>`;
+    if(name === 'creator') return `<div class="p-20 center"><h3>Add App</h3><input id="n" placeholder="Name"><br><br><input id="u" placeholder="URL"><br><br><button onclick="saveApp()">Add</button></div>`;
+    if(name === 'settings') return `<div class="p-20"><h3>Settings</h3><p>Theme: Dark (Locked)</p><button onclick="localStorage.clear();location.reload()" style="background:red;color:white;border:none;padding:10px;">Reset OS</button></div>`;
+    if(name === 'about') return `<div class="p-20 center"><h1>WebOS Luminal</h1><p>Created by TikTok Pr0xy</p></div>`;
+    if(name === 'files') return `<div class="p-20"><h3>Files</h3><input type="file" onchange="uploadFile(this)"></div>`;
+    return 'Error';
 }
 
-function addApp() {
-    const n = document.getElementById('new-name').value;
-    const u = document.getElementById('new-url').value;
+function saveApp() {
+    const n = document.getElementById('n').value;
+    const u = document.getElementById('u').value;
     if(n && u) {
-        const newApp = { name: n, icon: "fa-globe", color: "#555", type: "proxy", url: u };
-        apps.push(newApp);
-        let store = JSON.parse(localStorage.getItem('vm_user_apps') || '[]');
-        store.push(newApp);
-        localStorage.setItem('vm_user_apps', JSON.stringify(store));
+        const a = {name:n, icon:"fa-globe", color:"#555", type:"proxy", url:u};
+        apps.push(a);
+        localStorage.setItem('vm_user_apps', JSON.stringify([...JSON.parse(localStorage.getItem('vm_user_apps')||'[]'), a]));
         renderDesktop();
-        renderDock();
         alert("App Added!");
     }
 }
 
 // --- WINDOWS ---
-let zIdx = 100;
+let z = 100;
 function createWindow(title, content) {
-    zIdx++;
+    z++;
+    const id = 'win-' + Date.now();
     const win = document.createElement('div');
-    win.className = 'window';
-    win.style.zIndex = zIdx;
-    win.style.top = '100px'; win.style.left = '150px';
+    win.className = 'window pop-in';
+    win.id = id;
+    win.style.zIndex = z;
+    win.style.top = '100px'; win.style.left = '200px';
+    
+    // Right-side controls
     win.innerHTML = `
         <div class="title-bar" onmousedown="dragElement(event, this.parentElement)">
-            <div class="traffic-lights">
-                <div class="light close" onclick="this.closest('.window').remove()"></div>
-                <div class="light min" onclick="this.closest('.window').style.display='none'"></div>
-                <div class="light max" onclick="toggleMax(this.closest('.window'))"></div>
-            </div>
             <div class="win-title">${title}</div>
+            <div class="controls">
+                <div class="btn min" onclick="toggleWin('${id}')"></div>
+                <div class="btn max" onclick="maxWin('${id}')"></div>
+                <div class="btn close" onclick="closeWin('${id}')"></div>
+            </div>
         </div>
-        <div class="win-content">${content}</div>
+        <div class="content">${content}</div>
     `;
-    document.getElementById('windows-area').appendChild(win);
-    win.onmousedown = () => win.style.zIndex = ++zIdx;
+    document.getElementById('desktop').appendChild(win);
+    win.onmousedown = () => win.style.zIndex = ++z;
 }
 
-function toggleMax(win) {
-    if(win.style.width==='100%') {
-        win.style.width='700px'; win.style.height='500px'; win.style.top='100px'; win.style.left='150px';
+function closeWin(id) {
+    const win = document.getElementById(id);
+    win.classList.remove('pop-in');
+    win.classList.add('pop-out');
+    setTimeout(() => win.remove(), 200);
+}
+
+function maxWin(id) {
+    const win = document.getElementById(id);
+    if(win.style.width === '100%') {
+        win.style.width = '800px'; win.style.height = '600px'; win.style.top='100px'; win.style.left='200px';
     } else {
-        win.style.width='100%'; win.style.height='calc(100vh - 30px)'; win.style.top='30px'; win.style.left='0';
+        win.style.width = '100%'; win.style.height = 'calc(100vh - 45px)'; win.style.top='0'; win.style.left='0';
     }
 }
 
+function toggleWin(id) {
+    const win = document.getElementById(id);
+    win.style.display = 'none'; // Simple hide for now
+}
+
+// --- UTILS ---
 function dragElement(e, el, cb) {
     let pos3=e.clientX, pos4=e.clientY;
-    document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
+    document.onmouseup = () => { document.onmouseup=null; document.onmousemove=null; };
     document.onmousemove = (ev) => {
         ev.preventDefault();
-        let x = pos3 - ev.clientX;
-        let y = pos4 - ev.clientY;
-        pos3 = ev.clientX;
-        pos4 = ev.clientY;
-        el.style.top = (el.offsetTop - y) + "px";
-        el.style.left = (el.offsetLeft - x) + "px";
+        el.style.top = (el.offsetTop - (pos4 - ev.clientY)) + "px";
+        el.style.left = (el.offsetLeft - (pos3 - ev.clientX)) + "px";
+        pos3 = ev.clientX; pos4 = ev.clientY;
         if(cb) cb();
     };
 }
 
+function uploadFile(input) {
+    const reader = new FileReader();
+    reader.onload = e => {
+        localStorage.setItem('vm_wallpaper', e.target.result);
+        document.getElementById('desktop').style.backgroundImage = `url('${e.target.result}')`;
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
 function updateClock() {
     const d = new Date();
-    document.getElementById('clock').innerText = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('task-clock').innerText = d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
     setTimeout(updateClock, 1000);
 }
