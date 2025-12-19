@@ -3,53 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luminal OS Pro</title>
+    <title>WebOS Luminal</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div id="login-screen">
-        <div class="user-profile">
-            <div class="avatar"><i class="fa-solid fa-user-astronaut"></i></div>
-            <h2>Admin</h2>
-            <button onclick="login()">Enter</button>
-        </div>
+    <div id="boot-screen">
+        <h1>Luminal OS</h1>
     </div>
-
-    <div id="toast-container"></div>
-
-    <div id="context-menu">
-        <div class="menu-item" onclick="document.getElementById('wp-input').click()"><i class="fa-solid fa-image"></i> Change Wallpaper</div>
-        <div class="menu-item" onclick="triggerApp('creator')"><i class="fa-solid fa-plus"></i> Add New App</div>
-        <div class="menu-item" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> Restart System</div>
-        <div class="menu-divider"></div>
-        <div class="menu-item" onclick="toggleFullScreen()"><i class="fa-solid fa-expand"></i> Fullscreen</div>
-    </div>
-    
-    <input type="file" id="wp-input" hidden onchange="uploadFile(this)">
 
     <div id="desktop">
-        <div id="music-widget" onmousedown="dragElement(event, this)">
-            <div class="album-art"><i class="fa-solid fa-music"></i></div>
-            <div class="track-info">
-                <div class="song-title">Lo-Fi Beats</div>
-                <div class="artist">Unknown Artist</div>
-            </div>
-            <div class="controls-sm">
-                <i class="fa-solid fa-backward"></i>
-                <i class="fa-solid fa-play" onclick="this.classList.toggle('fa-pause'); this.classList.toggle('fa-play')"></i>
-                <i class="fa-solid fa-forward"></i>
-            </div>
-        </div>
-
         <div id="desktop-area"></div>
 
         <div class="taskbar">
-            <div id="start-btn" onclick="notify('Start Menu Locked')"><i class="fa-brands fa-windows"></i></div>
+            <div id="start-btn"><i class="fa-brands fa-windows" style="font-size:20px;"></i></div>
             <div id="dock-icons"></div>
             <div class="tray">
-                <i class="fa-solid fa-wifi" style="margin-right:10px;"></i>
-                <i class="fa-solid fa-volume-high" style="margin-right:15px;"></i>
                 <span id="task-clock">12:00</span>
             </div>
         </div>
