@@ -3,28 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VM</title>
+    <title>WebOS Luminal</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div id="boot-screen">
-        <i class="fa-brands fa-apple" style="font-size: 80px; color: white;"></i>
-        <div class="loading-bar"><div class="progress"></div></div>
+        <h1>Luminal OS</h1>
     </div>
 
     <div id="desktop">
-        <div class="top-bar">
-            <div class="left"><span><i class="fa-brands fa-apple"></i></span> <span>File</span> <span>Edit</span> <span>View</span></div>
-            <div class="right"><span id="clock">12:00 PM</span></div>
-        </div>
-
         <div id="desktop-area"></div>
 
-        <div id="windows-area"></div>
-
-        <div class="dock-container">
-            <div id="dock"></div>
+        <div class="taskbar">
+            <div id="start-btn"><i class="fa-brands fa-windows" style="font-size:20px;"></i></div>
+            <div id="dock-icons"></div>
+            <div class="tray">
+                <span id="task-clock">12:00</span>
+            </div>
         </div>
     </div>
 
