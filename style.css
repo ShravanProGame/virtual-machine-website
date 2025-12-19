@@ -1,0 +1,36 @@
+body { margin: 0; overflow: hidden; background: black; font-family: -apple-system, sans-serif; user-select: none; }
+
+/* Boot */
+#boot-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 1s; }
+.loading-bar { width: 200px; height: 4px; background: #333; margin-top: 50px; border-radius: 2px; overflow: hidden; }
+.progress { width: 0%; height: 100%; background: white; animation: load 1.5s forwards; }
+@keyframes load { to { width: 100%; } }
+
+/* Desktop */
+#desktop { width: 100vw; height: 100vh; background: url('https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1920&q=80') center/cover; opacity: 0; transition: opacity 1s; }
+
+/* Icons */
+.app-icon { position: absolute; width: 90px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; color: white; cursor: pointer; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+.app-icon:hover { background: rgba(255,255,255,0.1); border-radius: 10px; }
+.icon-img { width: 50px; height: 50px; border-radius: 12px; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); background-size: cover; background-position: center; }
+.icon-label { font-size: 12px; padding: 2px 4px; background: rgba(0,0,0,0.2); border-radius: 4px; }
+
+/* Windows */
+.window { position: absolute; width: 700px; height: 500px; background: white; border-radius: 10px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; resize: both; }
+.title-bar { height: 30px; background: #eee; border-bottom: 1px solid #ccc; display: flex; align-items: center; padding: 0 10px; }
+.traffic-lights { display: flex; gap: 8px; }
+.light { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; }
+.close { background: #ff5f56; } .min { background: #ffbd2e; } .max { background: #27c93f; }
+.win-title { flex: 1; text-align: center; font-size: 13px; font-weight: 600; color: #444; pointer-events: none; }
+.win-content { flex: 1; position: relative; }
+iframe { width: 100%; height: 100%; border: none; background: white; }
+
+/* Dock */
+.dock-container { position: absolute; bottom: 10px; width: 100%; display: flex; justify-content: center; z-index: 5000; }
+#dock { background: rgba(255,255,255,0.2); backdrop-filter: blur(15px); padding: 10px; border-radius: 16px; display: flex; gap: 15px; border: 1px solid rgba(255,255,255,0.1); }
+.dock-item { width: 50px; height: 50px; border-radius: 12px; background-size: cover; background-position: center; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #333; transition: transform 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.dock-item:hover { transform: scale(1.2) translateY(-10px); }
+
+/* Top Bar */
+.top-bar { position: absolute; top: 0; width: 100%; height: 28px; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; color: white; font-size: 13px; box-sizing: border-box; }
+.right { font-weight: 500; } .left span { margin-right: 15px; font-weight: 500; }
